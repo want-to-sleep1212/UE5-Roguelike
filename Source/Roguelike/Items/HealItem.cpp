@@ -54,6 +54,11 @@ void AHealItem::OnOverlapBegin(
 	const FHitResult& SweepResult
 )
 {
+	if (bConsumed)
+	{
+		return;
+	}
+
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 
 	if (Player == nullptr)
@@ -61,7 +66,8 @@ void AHealItem::OnOverlapBegin(
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("HealItem Picked Up. HealAmount: %f"), HealAmount);
+	Player->Heal(HealAmount);
+	//UE_LOG(LogTemp, Warning, TEXT("HealItem Picked Up. HealAmount: %f"), HealAmount);
 
 	Destroy();
 }

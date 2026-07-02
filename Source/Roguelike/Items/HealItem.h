@@ -43,4 +43,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Heal")
 	float HealAmount = 20.0f;
+
+private:
+	bool bConsumed = false;
 };

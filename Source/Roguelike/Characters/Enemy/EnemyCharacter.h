@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
+#include "Core/Types/CharacterStates.h"
+
 #include "EnemyCharacter.generated.h"
 
 class AEnemyCharacter;
@@ -56,4 +59,17 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	float CurrentHealth;
+
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", meta = (AllowPrivateAccess = "true"))
+	ELifeState LifeState = ELifeState::Alive;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Drop", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> DropItemClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Drop", meta = (ClampMin = "0.0", ClampMax = "1.0", AllowPrivateAccess = "true"))
+	float DropChance = 0.3f;
+
+private:
+	void TryDropItem();
 };

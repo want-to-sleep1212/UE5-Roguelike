@@ -14,6 +14,8 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+#include "Math/UnrealMathUtility.h"
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -72,6 +74,8 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	CurrentHealth = MaxHealth;
+
 	WeaponHitBox->OnComponentBeginOverlap.AddDynamic(
 		this,
 		&APlayerCharacter::OnWeaponHitBoxOverlap
@@ -386,4 +390,116 @@ void APlayerCharacter::OnWeaponHitBoxOverlap(
 	}
 
 	WeaponComponent->HandleHit(OtherActor);
+}
+
+EMovementState APlayerCharacter::GetMovementState() const
+{
+	return MovementState;
+}
+
+void APlayerCharacter::ChangeHealth(float Amount)
+{
+	if (Amount == 0.0f)
+	{
+		return;
+	}
+
+	const float OldHealth = CurrentHealth;
+
+	CurrentHealth = FMath::Clamp(
+		CurrentHealth + Amount,
+		0.0f,
+		MaxHealth
+	);
+
+	const float ActualChangedAmount = CurrentHealth - OldHealth;
+
+	UE_LOG(
+		LogTemp,
+		Warning,
+		TEXT("Player Health Changed: %.1f -> %.1f, Amount: %.1f"),
+		OldHealth,
+		CurrentHealth,
+		ActualChangedAmount
+	);
+
+	if (CurrentHealth <= 0.0f)
+	{
+		Die();
+	}
+}
+
+// Heal과 TakeDamage는 나중에 HealthComponent로 옮겨야 함
+void APlayerCharacter::Heal(float HealAmount)
+{
+	if (HealAmount <= 0.0f)
+	{
+		return;
+	}
+
+	if (LifeState == ELifeState::Dead)
+	{
+		return;
+	}
+
+	ChangeHealth(HealAmount);
+}
+
+float APlayerCharacter::TakeDamage(
+	float DamageAmount,
+	FDamageEvent const& DamageEvent,
+	AController* EventInstigator,
+	AActor* DamageCauser
+)
+{
+	const float ActualDamage = Super::TakeDamage(
+		DamageAmount,
+		DamageEvent,
+		EventInstigator,
+		DamageCauser
+	);
+
+	if (ActualDamage <= 0.0f)
+	{
+		return 0.0f;
+	}
+
+	if (LifeState == ELifeState::Dead)
+	{
+		return 0.0f;
+	}
+
+	ChangeHealth(-ActualDamage);
+
+	return ActualDamage;
+}
+
+void APlayerCharacter::Die()
+{
+	if (LifeState == ELifeState::Dead)
+	{
+		return;
+	}
+
+	LifeState = ELifeState::Dead;
+
+	UE_LOG(LogTemp, Warning, TEXT("Player Dead"));
+
+	// 우선은 입력/이동만 막아두기
+	GetCharacterMovement()->DisableMovement();
+
+	// 나중에 할 것들
+	// - 사망 애니메이션 재생
+	// - 게임 오버 UI 표시
+	// - 리스폰 또는 재시작 처리
+}
+
+float APlayerCharacter::GetCurrentHealth() const
+{
+	return CurrentHealth;
+}
+
+float APlayerCharacter::GetMaxHealth() const
+{
+	return MaxHealth;
 }

@@ -78,9 +78,54 @@ void AEnemyCharacter::Die()
 	//	*GetName()
 	//);
 
+	if (LifeState == ELifeState::Dead)
+	{
+		return;
+	}
+
+	LifeState = ELifeState::Dead;
+
 	UE_LOG(LogTemp, Warning, TEXT("Enemy Die"));
+
+	// Destroy 전에 호출해야 적 위치에서 드랍됨.
+	TryDropItem();
 
 	OnEnemyDead.Broadcast(this);
 
 	Destroy();
+}
+
+void AEnemyCharacter::TryDropItem()
+{
+	if (DropItemClass == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DropItemClass is nullptr"));
+		return;
+	}
+
+	const float RandomValue = FMath::FRand();
+
+	if (RandomValue > DropChance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Item drop failed. Random: %.2f, Chance: %.2f"), RandomValue, DropChance);
+		return;
+	}
+
+	FVector SpawnLocation = GetActorLocation();
+	SpawnLocation.Z += 30.0f;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+
+	AActor* DroppedItem = GetWorld()->SpawnActor<AActor>(
+		DropItemClass,
+		SpawnLocation,
+		FRotator::ZeroRotator,
+		SpawnParams
+	);
+
+	if (DroppedItem != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Enemy dropped item"));
+	}
 }

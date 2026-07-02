@@ -40,12 +40,24 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-	// getter
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "State")
-	FORCEINLINE EMovementState GetMovementState() const
-	{
-		return MovementState;
-	}
+	EMovementState GetMovementState() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void Heal(float HealAmount);
+
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		class AController* EventInstigator,
+		AActor* DamageCauser
+	) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	float GetCurrentHealth() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	float GetMaxHealth() const;
 
 private:
 	// 입력
@@ -72,6 +84,10 @@ private:
 		bool bFromSweep,
 		const FHitResult& SweepResult
 	);
+
+	void ChangeHealth(float Amount);
+
+	void Die();
 
 private:
 	// 카메라
@@ -148,4 +164,11 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* WeaponMesh;
+
+	// 체력
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	float MaxHealth = 100.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	float CurrentHealth = 100.0f;
 };
