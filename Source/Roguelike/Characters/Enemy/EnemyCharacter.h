@@ -45,6 +45,8 @@ public:
 		AActor* DamageCauser
 	) override;
 
+	void Attack();
+
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnEnemyDead OnEnemyDead;

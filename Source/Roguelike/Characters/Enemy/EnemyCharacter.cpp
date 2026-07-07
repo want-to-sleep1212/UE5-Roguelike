@@ -69,6 +69,11 @@ float AEnemyCharacter::TakeDamage(
 	return DamageAmount;
 }
 
+void AEnemyCharacter::Attack()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Enemy Attack Called"));
+}
+
 void AEnemyCharacter::Die()
 {
 	//UE_LOG(
