@@ -13,11 +13,9 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
-#include "Components/Combat/WeaponComponent.h"
-#include "Components/BoxComponent.h"
-#include "Components/StaticMeshComponent.h"
-
 #include "PlayerCharacter.generated.h"
+
+class AWeaponActor;
 
 UCLASS()
 class ROGUELIKE_API APlayerCharacter : public ACharacter
@@ -65,7 +63,6 @@ private:
 	void MoveInputCompleted(const FInputActionValue& Value);
 	void DashInput();
 	void AttackInput();
-	void EndAttack();
 	void LookInput(const FInputActionValue& Value);
 
 	// 대쉬
@@ -74,20 +71,14 @@ private:
 	// 무적
 	void EndInvincible();
 
-	// 공격
-	UFUNCTION()
-	void OnWeaponHitBoxOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult
-	);
-
+	// 체력
 	void ChangeHealth(float Amount);
 
 	void Die();
+
+	// 공격
+	UFUNCTION()
+	void EndAttack();
 
 private:
 	// 카메라
@@ -150,20 +141,15 @@ private:
 	FTimerHandle InvincibleTimerHandle;
 
 	// 공격
-	FTimerHandle AttackTimerHandle;
-
 	UPROPERTY(EditAnywhere)
-	float AttackPower = 10.0f;
+	float AttackPowerBonus = 0.0f;
 
 	// 무기
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	UWeaponComponent* WeaponComponent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AWeaponActor> WeaponClass;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	UBoxComponent* WeaponHitBox;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* WeaponMesh;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	AWeaponActor* CurrentWeapon;
 
 	// 체력
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))

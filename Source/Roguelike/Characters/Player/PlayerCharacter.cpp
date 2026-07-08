@@ -16,6 +16,8 @@
 
 #include "Math/UnrealMathUtility.h"
 
+#include "Weapons/WeaponActor.h"
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -36,37 +38,9 @@ APlayerCharacter::APlayerCharacter()
 	CameraBoom->bInheritRoll = false;
 
 
-
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
-
-
-
-	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
-
-
-
-	WeaponHitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponHitBox"));
-	WeaponHitBox->SetupAttachment(GetMesh());
-
-	WeaponHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WeaponHitBox->SetCollisionObjectType(ECC_WorldDynamic);
-	WeaponHitBox->SetCollisionResponseToAllChannels(ECR_Ignore);
-	WeaponHitBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-
-	WeaponHitBox->SetBoxExtent(FVector(30.f, 60.f, 30.f));
-
-
-	WeaponHitBox->SetGenerateOverlapEvents(true);
-
-
-	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
-	WeaponMesh->SetupAttachment(GetMesh(), TEXT("RightHand"));
-
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	WeaponHitBox->SetupAttachment(WeaponMesh);
 }
 
 // Called when the game starts or when spawned
@@ -76,12 +50,27 @@ void APlayerCharacter::BeginPlay()
 	
 	CurrentHealth = MaxHealth;
 
-	WeaponHitBox->OnComponentBeginOverlap.AddDynamic(
-		this,
-		&APlayerCharacter::OnWeaponHitBoxOverlap
-	);
+	if (WeaponClass)
+	{
+		CurrentWeapon = GetWorld()->SpawnActor<AWeaponActor>(WeaponClass);
 
-	//UE_LOG(LogTemp, Warning, TEXT("WeaponHitBox Overlap Bound"));
+		if (CurrentWeapon)
+		{
+			CurrentWeapon->SetOwner(this);
+			CurrentWeapon->SetInstigator(this);
+
+			CurrentWeapon->AttachToComponent(
+				GetMesh(),
+				FAttachmentTransformRules::SnapToTargetIncludingScale,
+				TEXT("RightHand")
+			);
+
+			CurrentWeapon->OnAttackEnded.AddDynamic(
+				this,
+				&APlayerCharacter::EndAttack
+			);
+		}
+	}
 }
 
 // Called every frame
@@ -331,30 +320,20 @@ void APlayerCharacter::AttackInput()
 		return;
 	}
 
+	if (!CurrentWeapon)
+	{
+		return;
+	}
+
+	CurrentWeapon->StartAttack();
+
 	ActionState = EActionState::Attack;
-
-	WeaponComponent->StartAttack();
-
-	WeaponHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	//UE_LOG(LogTemp, Warning, TEXT("WeaponHitBox Enabled"));
-
-	GetWorldTimerManager().SetTimer(
-		AttackTimerHandle,
-		this,
-		&APlayerCharacter::EndAttack,
-		0.5f,
-		false
-	);
 }
 
 void APlayerCharacter::EndAttack()
 {
 	ActionState = EActionState::None;
-
-	WeaponComponent->EndAttack();
-
-	WeaponHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//UE_LOG(LogTemp, Warning, TEXT("WeaponHitBox Disabled"));
+	//UE_LOG(LogTemp, Warning, TEXT("Player EndAttack"));
 }
 
 void APlayerCharacter::LookInput(const FInputActionValue& Value)
@@ -365,31 +344,6 @@ void APlayerCharacter::LookInput(const FInputActionValue& Value)
 
 	AddControllerYawInput(LookAxisVector.X/* * LookSensitivity*/);
 	AddControllerPitchInput(LookAxisVector.Y/* * LookSensitivity*/);
-}
-
-void APlayerCharacter::OnWeaponHitBoxOverlap(
-	UPrimitiveComponent* OverlappedComponent,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex,
-	bool bFromSweep,
-	const FHitResult& SweepResult
-)
-{
-	//UE_LOG(LogTemp, Warning, TEXT("Weapon Overlap: %s"),
-	//	OtherActor ? *OtherActor->GetName() : TEXT("NULL"));
-
-	if (OtherActor == nullptr || OtherActor == this)
-	{
-		return;
-	}
-
-	if (WeaponComponent == nullptr)
-	{
-		return;
-	}
-
-	WeaponComponent->HandleHit(OtherActor);
 }
 
 EMovementState APlayerCharacter::GetMovementState() const

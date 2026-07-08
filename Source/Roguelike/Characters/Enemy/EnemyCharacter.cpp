@@ -52,14 +52,14 @@ float AEnemyCharacter::TakeDamage(
 
 	CurrentHealth -= DamageAmount;
 
-	//UE_LOG(
-	//	LogTemp,
-	//	Warning,
-	//	TEXT("%s Take Damage : %.1f / Current HP : %.1f"),
-	//	*GetName(),
-	//	DamageAmount,
-	//	CurrentHealth
-	//);
+	UE_LOG(
+		LogTemp,
+		Warning,
+		TEXT("%s Take Damage : %.1f / Current HP : %.1f"),
+		*GetName(),
+		DamageAmount,
+		CurrentHealth
+	);
 
 	if (CurrentHealth <= 0.f)
 	{
@@ -71,7 +71,7 @@ float AEnemyCharacter::TakeDamage(
 
 void AEnemyCharacter::Attack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Enemy Attack Called"));
+	//UE_LOG(LogTemp, Warning, TEXT("Enemy Attack Called"));
 }
 
 void AEnemyCharacter::Die()

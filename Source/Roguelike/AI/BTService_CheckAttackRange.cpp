@@ -65,10 +65,10 @@ void UBTService_CheckAttackRange::TickNode(
 		bIsInAttackRange
 	);
 
-	UE_LOG(
-		LogTemp,
-		Warning,
-		TEXT("InAttackRange : %s"),
-		bIsInAttackRange ? TEXT("True") : TEXT("False")
-	);
+	//UE_LOG(
+	//	LogTemp,
+	//	Warning,
+	//	TEXT("InAttackRange : %s"),
+	//	bIsInAttackRange ? TEXT("True") : TEXT("False")
+	//);
 }
