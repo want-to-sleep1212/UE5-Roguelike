@@ -13,12 +13,17 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
+#include "Core/Interfaces/CombatStateInterface.h"
+
 #include "PlayerCharacter.generated.h"
 
+class UCombatComponent;
 class AWeaponActor;
 
 UCLASS()
-class ROGUELIKE_API APlayerCharacter : public ACharacter
+class ROGUELIKE_API APlayerCharacter
+	: public ACharacter
+	, public ICombatStateInterface
 {
 	GENERATED_BODY()
 
@@ -38,8 +43,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "State")
-	EMovementState GetMovementState() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void Heal(float HealAmount);
@@ -51,11 +54,23 @@ public:
 		AActor* DamageCauser
 	) override;
 
+	// getter
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float GetCurrentHealth() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float GetMaxHealth() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "State")
+	EMovementState GetMovementState() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "State")
+	EControlState GetControlState() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "State")
+	ELifeState GetLifeState() const;
+
+	virtual bool CanStartAttack() const override;
 
 private:
 	// 입력
@@ -75,10 +90,6 @@ private:
 	void ChangeHealth(float Amount);
 
 	void Die();
-
-	// 공격
-	UFUNCTION()
-	void EndAttack();
 
 private:
 	// 카메라
@@ -111,9 +122,6 @@ private:
 	EMovementState MovementState = EMovementState::Idle;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", meta = (AllowPrivateAccess = "true"))
-	EActionState ActionState = EActionState::None;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", meta = (AllowPrivateAccess = "true"))
 	EControlState ControlState = EControlState::Normal;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", meta = (AllowPrivateAccess = "true"))
@@ -140,21 +148,14 @@ private:
 	// 무적
 	FTimerHandle InvincibleTimerHandle;
 
-	// 공격
-	UPROPERTY(EditAnywhere)
-	float AttackPowerBonus = 0.0f;
-
-	// 무기
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<AWeaponActor> WeaponClass;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	AWeaponActor* CurrentWeapon;
-
 	// 체력
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
 	float MaxHealth = 100.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
 	float CurrentHealth = 100.0f;
+
+	// 전투
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UCombatComponent* CombatComponent;
 };

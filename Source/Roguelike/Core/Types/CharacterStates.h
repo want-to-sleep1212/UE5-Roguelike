@@ -12,7 +12,7 @@ enum class EMovementState : uint8
 };
 
 UENUM(BlueprintType)
-enum class EActionState : uint8
+enum class ECombatState : uint8
 {
 	None,
 	Attack,

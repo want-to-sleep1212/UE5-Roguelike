@@ -49,15 +49,7 @@ void ACombatRoomBase::ActivateEnemies()
 		//	Enemy->GetActorEnableCollision(),
 		//	Enemy->IsActorTickEnabled()
 		//);
-		Enemy->SetActorHiddenInGame(false);
-		Enemy->SetActorEnableCollision(true);
-		Enemy->SetActorTickEnabled(true);
-
-		if (Enemy->GetCharacterMovement())
-		{
-			Enemy->GetCharacterMovement()->SetComponentTickEnabled(true);
-			Enemy->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-		}
+		Enemy->Activate();
 	}
 }
 
@@ -71,15 +63,7 @@ void ACombatRoomBase::DeactivateEnemies()
 		}
 		//UE_LOG(LogTemp, Warning, TEXT("DeactivateEnemy: %s"), *Enemy->GetName());
 
-		Enemy->SetActorHiddenInGame(true);
-		Enemy->SetActorEnableCollision(false);
-		Enemy->SetActorTickEnabled(false);
-
-		if (Enemy->GetCharacterMovement())
-		{
-			Enemy->GetCharacterMovement()->DisableMovement();
-			Enemy->GetCharacterMovement()->SetComponentTickEnabled(false);
-		}
+		Enemy->Deactivate();
 	}
 }
 

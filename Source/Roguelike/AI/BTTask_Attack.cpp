@@ -7,6 +7,7 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "GameFramework/Pawn.h"
 #include "Characters/Enemy/EnemyCharacter.h"
+#include "Components/Combat/CombatComponent.h"
 
 UBTTask_Attack::UBTTask_Attack()
 {
@@ -22,6 +23,7 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(
 
 	if (AIController == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("AIController is null"));
 		return EBTNodeResult::Failed;
 	}
 
@@ -29,6 +31,7 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(
 
 	if (OwnerPawn == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("AIController Pawn is null"));
 		return EBTNodeResult::Failed;
 	}
 
@@ -36,10 +39,25 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(
 
 	if (Enemy == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("EnemyCharacter cast failed"));
 		return EBTNodeResult::Failed;
 	}
 
-	Enemy->Attack();
+	if (!Enemy->CanStartAttack())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Enemy can't StartAttack"));
+		return EBTNodeResult::Failed;
+	}
+
+	UCombatComponent* CombatComponent = Enemy->GetCombatComponent();
+
+	if (!CombatComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CombatComponent is null"));
+		return EBTNodeResult::Failed;
+	}
+
+	CombatComponent->StartAttack();
 
 	return EBTNodeResult::Succeeded;
 }

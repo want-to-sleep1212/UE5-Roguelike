@@ -24,9 +24,6 @@ AWeaponActor::AWeaponActor()
 	WeaponHitBox->SetupAttachment(WeaponMesh);
 
 	WeaponHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WeaponHitBox->SetCollisionObjectType(ECC_WorldDynamic);
-	WeaponHitBox->SetCollisionResponseToAllChannels(ECR_Ignore);
-	WeaponHitBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	WeaponHitBox->SetBoxExtent(FVector(30.f, 60.f, 30.f));
 	WeaponHitBox->SetGenerateOverlapEvents(true);
 }

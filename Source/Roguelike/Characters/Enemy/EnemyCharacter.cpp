@@ -3,6 +3,9 @@
 
 #include "Characters/Enemy/EnemyCharacter.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/Combat/CombatComponent.h"
+
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -12,6 +15,8 @@ AEnemyCharacter::AEnemyCharacter()
 
 	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
+
+	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -71,7 +76,7 @@ float AEnemyCharacter::TakeDamage(
 
 void AEnemyCharacter::Attack()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Enemy Attack Called"));
+	UE_LOG(LogTemp, Warning, TEXT("Enemy Attack Called"));
 }
 
 void AEnemyCharacter::Die()
@@ -132,5 +137,54 @@ void AEnemyCharacter::TryDropItem()
 	if (DroppedItem != nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Enemy dropped item"));
+	}
+}
+
+bool AEnemyCharacter::CanStartAttack() const
+{
+	if (LifeState == ELifeState::Dead)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+UCombatComponent* AEnemyCharacter::GetCombatComponent() const
+{
+	return CombatComponent;
+}
+
+void AEnemyCharacter::Activate()
+{
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
+
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->SetComponentTickEnabled(true);
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	}
+
+	if (CombatComponent)
+	{
+		CombatComponent->SetWeaponVisible(true);
+	}
+}
+
+void AEnemyCharacter::Deactivate()
+{
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->DisableMovement();
+		GetCharacterMovement()->SetComponentTickEnabled(false);
+	}
+
+	if (CombatComponent)
+	{
+		CombatComponent->SetWeaponVisible(false);
 	}
 }

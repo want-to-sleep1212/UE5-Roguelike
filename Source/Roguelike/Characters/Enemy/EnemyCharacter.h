@@ -6,10 +6,12 @@
 #include "GameFramework/Character.h"
 
 #include "Core/Types/CharacterStates.h"
+#include "Core/Interfaces/CombatStateInterface.h"
 
 #include "EnemyCharacter.generated.h"
 
 class AEnemyCharacter;
+class UCombatComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 	FOnEnemyDead,
@@ -18,7 +20,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 );
 
 UCLASS()
-class ROGUELIKE_API AEnemyCharacter : public ACharacter
+class ROGUELIKE_API AEnemyCharacter
+	: public ACharacter
+	, public ICombatStateInterface
 {
 	GENERATED_BODY()
 
@@ -47,6 +51,13 @@ public:
 
 	void Attack();
 
+	virtual bool CanStartAttack() const override;
+
+	UCombatComponent* GetCombatComponent() const;
+
+	void Activate();
+	void Deactivate();
+
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnEnemyDead OnEnemyDead;
@@ -63,6 +74,9 @@ protected:
 	float CurrentHealth;
 
 private:
+	void TryDropItem();
+
+private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", meta = (AllowPrivateAccess = "true"))
 	ELifeState LifeState = ELifeState::Alive;
 
@@ -72,6 +86,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Drop", meta = (ClampMin = "0.0", ClampMax = "1.0", AllowPrivateAccess = "true"))
 	float DropChance = 0.3f;
 
-private:
-	void TryDropItem();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UCombatComponent* CombatComponent;
 };

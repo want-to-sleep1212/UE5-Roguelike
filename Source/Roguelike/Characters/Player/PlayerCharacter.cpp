@@ -17,6 +17,7 @@
 #include "Math/UnrealMathUtility.h"
 
 #include "Weapons/WeaponActor.h"
+#include "Components/Combat/CombatComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -28,6 +29,7 @@ APlayerCharacter::APlayerCharacter()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
+
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -41,6 +43,9 @@ APlayerCharacter::APlayerCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+
+	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -49,28 +54,6 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	CurrentHealth = MaxHealth;
-
-	if (WeaponClass)
-	{
-		CurrentWeapon = GetWorld()->SpawnActor<AWeaponActor>(WeaponClass);
-
-		if (CurrentWeapon)
-		{
-			CurrentWeapon->SetOwner(this);
-			CurrentWeapon->SetInstigator(this);
-
-			CurrentWeapon->AttachToComponent(
-				GetMesh(),
-				FAttachmentTransformRules::SnapToTargetIncludingScale,
-				TEXT("RightHand")
-			);
-
-			CurrentWeapon->OnAttackEnded.AddDynamic(
-				this,
-				&APlayerCharacter::EndAttack
-			);
-		}
-	}
 }
 
 // Called every frame
@@ -131,6 +114,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	if (IA_Attack == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("IA_Attack is nullptr"));
+		return;
+	}
+
+	if (IA_Look == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("IA_Look is nullptr"));
 		return;
 	}
 
@@ -303,37 +292,12 @@ void APlayerCharacter::EndInvincible()
 
 void APlayerCharacter::AttackInput()
 {
-	if (LifeState == ELifeState::Dead ||
-		ControlState == EControlState::Stunned)
+	if (!CombatComponent)
 	{
 		return;
 	}
 
-	if (ActionState == EActionState::Attack ||
-		ActionState == EActionState::Skill)
-	{
-		return;
-	}
-
-	if (MovementState == EMovementState::Dash)
-	{
-		return;
-	}
-
-	if (!CurrentWeapon)
-	{
-		return;
-	}
-
-	CurrentWeapon->StartAttack();
-
-	ActionState = EActionState::Attack;
-}
-
-void APlayerCharacter::EndAttack()
-{
-	ActionState = EActionState::None;
-	//UE_LOG(LogTemp, Warning, TEXT("Player EndAttack"));
+	CombatComponent->StartAttack();
 }
 
 void APlayerCharacter::LookInput(const FInputActionValue& Value)
@@ -344,11 +308,6 @@ void APlayerCharacter::LookInput(const FInputActionValue& Value)
 
 	AddControllerYawInput(LookAxisVector.X/* * LookSensitivity*/);
 	AddControllerPitchInput(LookAxisVector.Y/* * LookSensitivity*/);
-}
-
-EMovementState APlayerCharacter::GetMovementState() const
-{
-	return MovementState;
 }
 
 void APlayerCharacter::ChangeHealth(float Amount)
@@ -368,14 +327,7 @@ void APlayerCharacter::ChangeHealth(float Amount)
 
 	const float ActualChangedAmount = CurrentHealth - OldHealth;
 
-	UE_LOG(
-		LogTemp,
-		Warning,
-		TEXT("Player Health Changed: %.1f -> %.1f, Amount: %.1f"),
-		OldHealth,
-		CurrentHealth,
-		ActualChangedAmount
-	);
+	UE_LOG(LogTemp, Warning, TEXT("Player Health Changed: %.1f -> %.1f, Amount: %.1f"), OldHealth, CurrentHealth, ActualChangedAmount);
 
 	if (CurrentHealth <= 0.0f)
 	{
@@ -456,4 +408,35 @@ float APlayerCharacter::GetCurrentHealth() const
 float APlayerCharacter::GetMaxHealth() const
 {
 	return MaxHealth;
+}
+
+EMovementState APlayerCharacter::GetMovementState() const
+{
+	return MovementState;
+}
+
+EControlState APlayerCharacter::GetControlState() const
+{
+	return ControlState;
+}
+
+ELifeState APlayerCharacter::GetLifeState() const
+{
+	return LifeState;
+}
+
+bool APlayerCharacter::CanStartAttack() const
+{
+	if (LifeState == ELifeState::Dead ||
+		ControlState == EControlState::Stunned)
+	{
+		return false;
+	}
+
+	if (MovementState == EMovementState::Dash)
+	{
+		return false;
+	}
+
+	return true;
 }
