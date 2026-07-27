@@ -19,6 +19,8 @@
 #include "Weapons/WeaponActor.h"
 #include "Components/Combat/CombatComponent.h"
 
+#include "Components/Health/HealthComponent.h"
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -46,21 +48,29 @@ APlayerCharacter::APlayerCharacter()
 
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	CurrentHealth = MaxHealth;
+
+	if (HealthComponent)
+	{
+		HealthComponent->OnDeath.AddDynamic(
+			this,
+			&APlayerCharacter::Die
+		);
+	}
 }
 
 // Called every frame
-void APlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
+//void APlayerCharacter::Tick(float DeltaTime)
+//{
+//	Super::Tick(DeltaTime);
+//}
 
 // Called to bind functionality to input
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -310,47 +320,6 @@ void APlayerCharacter::LookInput(const FInputActionValue& Value)
 	AddControllerPitchInput(LookAxisVector.Y/* * LookSensitivity*/);
 }
 
-void APlayerCharacter::ChangeHealth(float Amount)
-{
-	if (Amount == 0.0f)
-	{
-		return;
-	}
-
-	const float OldHealth = CurrentHealth;
-
-	CurrentHealth = FMath::Clamp(
-		CurrentHealth + Amount,
-		0.0f,
-		MaxHealth
-	);
-
-	const float ActualChangedAmount = CurrentHealth - OldHealth;
-
-	UE_LOG(LogTemp, Warning, TEXT("Player Health Changed: %.1f -> %.1f, Amount: %.1f"), OldHealth, CurrentHealth, ActualChangedAmount);
-
-	if (CurrentHealth <= 0.0f)
-	{
-		Die();
-	}
-}
-
-// Heal과 TakeDamage는 나중에 HealthComponent로 옮겨야 함
-void APlayerCharacter::Heal(float HealAmount)
-{
-	if (HealAmount <= 0.0f)
-	{
-		return;
-	}
-
-	if (LifeState == ELifeState::Dead)
-	{
-		return;
-	}
-
-	ChangeHealth(HealAmount);
-}
-
 float APlayerCharacter::TakeDamage(
 	float DamageAmount,
 	FDamageEvent const& DamageEvent,
@@ -365,17 +334,12 @@ float APlayerCharacter::TakeDamage(
 		DamageCauser
 	);
 
-	if (ActualDamage <= 0.0f)
+	if (ActualDamage <= 0.0f || !HealthComponent)
 	{
 		return 0.0f;
 	}
 
-	if (LifeState == ELifeState::Dead)
-	{
-		return 0.0f;
-	}
-
-	ChangeHealth(-ActualDamage);
+	HealthComponent->ApplyDamage(ActualDamage);
 
 	return ActualDamage;
 }
@@ -402,12 +366,16 @@ void APlayerCharacter::Die()
 
 float APlayerCharacter::GetCurrentHealth() const
 {
-	return CurrentHealth;
+	return HealthComponent
+		? HealthComponent->GetCurrentHealth()
+		: 0.0f;
 }
 
 float APlayerCharacter::GetMaxHealth() const
 {
-	return MaxHealth;
+	return HealthComponent
+		? HealthComponent->GetMaxHealth()
+		: 0.0f;
 }
 
 EMovementState APlayerCharacter::GetMovementState() const

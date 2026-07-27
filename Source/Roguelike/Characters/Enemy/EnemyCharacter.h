@@ -12,6 +12,7 @@
 
 class AEnemyCharacter;
 class UCombatComponent;
+class UHealthComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 	FOnEnemyDead,
@@ -66,13 +67,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void Die();
 
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
-	float MaxHealth = 30.f;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
-	float CurrentHealth;
-
 private:
 	void TryDropItem();
 
@@ -88,4 +82,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UCombatComponent* CombatComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	UHealthComponent* HealthComponent;
 };

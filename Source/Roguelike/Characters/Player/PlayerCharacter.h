@@ -19,6 +19,7 @@
 
 class UCombatComponent;
 class AWeaponActor;
+class UHealthComponent;
 
 UCLASS()
 class ROGUELIKE_API APlayerCharacter
@@ -37,16 +38,12 @@ protected:
 
 public:	
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	//virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-
-	UFUNCTION(BlueprintCallable, Category = "Health")
-	void Heal(float HealAmount);
-
 	virtual float TakeDamage(
 		float DamageAmount,
 		struct FDamageEvent const& DamageEvent,
@@ -86,9 +83,7 @@ private:
 	// 무적
 	void EndInvincible();
 
-	// 체력
-	void ChangeHealth(float Amount);
-
+	UFUNCTION()
 	void Die();
 
 private:
@@ -149,11 +144,8 @@ private:
 	FTimerHandle InvincibleTimerHandle;
 
 	// 체력
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
-	float MaxHealth = 100.0f;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
-	float CurrentHealth = 100.0f;
+	UHealthComponent* HealthComponent;
 
 	// 전투
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))

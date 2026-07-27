@@ -5,6 +5,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/Combat/CombatComponent.h"
 
+#include "Components/Health/HealthComponent.h"
+
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -17,13 +19,22 @@ AEnemyCharacter::AEnemyCharacter()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 // Called when the game starts or when spawned
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	CurrentHealth = MaxHealth;
+
+	if (HealthComponent)
+	{
+		HealthComponent->OnDeath.AddDynamic(
+			this,
+			&AEnemyCharacter::Die
+		);
+	}
 }
 
 //// Called every frame
@@ -47,31 +58,21 @@ float AEnemyCharacter::TakeDamage(
 	AActor* DamageCauser
 )
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Enemy TakeDamage"));
-	Super::TakeDamage(
+	const float ActualDamage = Super::TakeDamage(
 		DamageAmount,
 		DamageEvent,
 		EventInstigator,
 		DamageCauser
 	);
 
-	CurrentHealth -= DamageAmount;
-
-	UE_LOG(
-		LogTemp,
-		Warning,
-		TEXT("%s Take Damage : %.1f / Current HP : %.1f"),
-		*GetName(),
-		DamageAmount,
-		CurrentHealth
-	);
-
-	if (CurrentHealth <= 0.f)
+	if (ActualDamage <= 0.0f || HealthComponent == nullptr)
 	{
-		Die();
+		return 0.0f;
 	}
 
-	return DamageAmount;
+	HealthComponent->ApplyDamage(ActualDamage);
+
+	return ActualDamage;
 }
 
 void AEnemyCharacter::Attack()
@@ -97,7 +98,7 @@ void AEnemyCharacter::Die()
 
 	UE_LOG(LogTemp, Warning, TEXT("Enemy Die"));
 
-	// Destroy 전에 호출해야 적 위치에서 드랍됨.
+	// Destroy 전에 호출
 	TryDropItem();
 
 	OnEnemyDead.Broadcast(this);

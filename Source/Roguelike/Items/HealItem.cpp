@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Characters/Player/PlayerCharacter.h"
+#include "Components/Health/HealthComponent.h"
 
 // Sets default values
 AHealItem::AHealItem()
@@ -54,7 +55,7 @@ void AHealItem::OnOverlapBegin(
 	const FHitResult& SweepResult
 )
 {
-	if (bConsumed)
+	if (bConsumed || OtherActor == nullptr)
 	{
 		return;
 	}
@@ -66,8 +67,16 @@ void AHealItem::OnOverlapBegin(
 		return;
 	}
 
-	Player->Heal(HealAmount);
-	//UE_LOG(LogTemp, Warning, TEXT("HealItem Picked Up. HealAmount: %f"), HealAmount);
+	UHealthComponent* HealthComponent = Player->FindComponentByClass<UHealthComponent>();
+
+	if (HealthComponent == nullptr)
+	{
+		return;
+	}
+
+	bConsumed = true;
+
+	HealthComponent->Heal(HealAmount);
 
 	Destroy();
 }
