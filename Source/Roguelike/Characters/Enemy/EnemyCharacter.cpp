@@ -9,6 +9,8 @@
 
 #include "GameFramework/CharacterMovementComponent.h"
 
+#include "UI/Components/HealthBarComponent.h"
+
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -20,7 +22,12 @@ AEnemyCharacter::AEnemyCharacter()
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 
-	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	CharacterHealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("CharacterHealthComponent"));
+
+	HealthBarComponent = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBarComponent"));
+
+	HealthBarComponent->SetupAttachment(GetRootComponent());
+	HealthBarComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
 }
 
 // Called when the game starts or when spawned
@@ -28,9 +35,9 @@ void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HealthComponent)
+	if (CharacterHealthComponent)
 	{
-		HealthComponent->OnDeath.AddDynamic(
+		CharacterHealthComponent->OnDeath.AddDynamic(
 			this,
 			&AEnemyCharacter::Die
 		);
@@ -58,6 +65,13 @@ float AEnemyCharacter::TakeDamage(
 	AActor* DamageCauser
 )
 {
+	UE_LOG(
+		LogTemp,
+		Warning,
+		TEXT("Enemy TakeDamage: %f"),
+		DamageAmount
+	);
+
 	const float ActualDamage = Super::TakeDamage(
 		DamageAmount,
 		DamageEvent,
@@ -65,12 +79,12 @@ float AEnemyCharacter::TakeDamage(
 		DamageCauser
 	);
 
-	if (ActualDamage <= 0.0f || HealthComponent == nullptr)
+	if (ActualDamage <= 0.0f || CharacterHealthComponent == nullptr)
 	{
 		return 0.0f;
 	}
 
-	HealthComponent->ApplyDamage(ActualDamage);
+	CharacterHealthComponent->ApplyDamage(ActualDamage);
 
 	return ActualDamage;
 }

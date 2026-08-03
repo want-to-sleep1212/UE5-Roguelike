@@ -21,6 +21,12 @@ void UHealthComponent::BeginPlay()
 
 	CurrentHealth = MaxHealth;
 	bDead = false;
+
+	OnHealthChanged.Broadcast(
+		CurrentHealth,
+		MaxHealth,
+		0.0f
+	);
 }
 
 

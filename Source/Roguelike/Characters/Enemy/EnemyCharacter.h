@@ -13,6 +13,7 @@
 class AEnemyCharacter;
 class UCombatComponent;
 class UHealthComponent;
+class UHealthBarComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 	FOnEnemyDead,
@@ -81,8 +82,12 @@ private:
 	float DropChance = 0.3f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	UCombatComponent* CombatComponent;
+	TObjectPtr<UCombatComponent> CombatComponent;
 
+	// 블루프린트 참조 문제로 이름 수정
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
-	UHealthComponent* HealthComponent;
+	TObjectPtr<UHealthComponent> CharacterHealthComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UHealthBarComponent> HealthBarComponent;
 };
