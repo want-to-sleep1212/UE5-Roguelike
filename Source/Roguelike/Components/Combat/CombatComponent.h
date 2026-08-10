@@ -30,13 +30,15 @@ protected:
 //	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	void StartAttack();
+	bool StartAttack();
+	void EndAttack();
+
+	void BeginAttackWindow();
+	void EndAttackWindow();
 
 	void SetWeaponVisible(bool bVisible);
 
 private:
-	UFUNCTION()
-	void EndAttack();
 
 	void InitializeWeapon();
 	void EquipWeapon(AWeaponActor* NewWeapon);
@@ -48,22 +50,6 @@ private:
 	// 상태
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", meta = (AllowPrivateAccess = "true"))
 	ECombatState CombatState = ECombatState::None;
-
-	// 공격
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
-	float AttackDamage = 10.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
-	float AttackDuration = 0.3f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
-	float AttackCooldown = 1.0f;
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
-	float AttackPowerBonus = 0.0f;
-
-	bool bIsAttacking = false;
-
-	FTimerHandle AttackTimerHandle;
 
 	// 무기
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))

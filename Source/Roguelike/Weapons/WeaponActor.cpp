@@ -38,7 +38,7 @@ void AWeaponActor::BeginPlay()
 	);
 }
 
-void AWeaponActor::StartAttack()
+void AWeaponActor::BeginAttackWindow()
 {
 	if (bIsAttacking)
 	{
@@ -49,24 +49,12 @@ void AWeaponActor::StartAttack()
 	HitActors.Empty();
 
 	EnableHitBox();
-
-	GetWorldTimerManager().SetTimer(
-		AttackTimerHandle,
-		this,
-		&AWeaponActor::EndAttack,
-		AttackDuration,
-		false
-	);
 }
 
-void AWeaponActor::EndAttack()
+void AWeaponActor::EndAttackWindow()
 {
 	bIsAttacking = false;
 	DisableHitBox();
-
-	OnAttackEnded.Broadcast();
-
-	//UE_LOG(LogTemp, Warning, TEXT("Weapon EndAttack"));
 }
 
 void AWeaponActor::EnableHitBox()

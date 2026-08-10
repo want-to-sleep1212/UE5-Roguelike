@@ -57,7 +57,9 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(
 		return EBTNodeResult::Failed;
 	}
 
-	CombatComponent->StartAttack();
+	AIController->StopMovement();
+
+	Enemy->Attack();
 
 	return EBTNodeResult::Succeeded;
 }

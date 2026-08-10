@@ -11,11 +11,20 @@
 
 #include "UI/Components/HealthBarComponent.h"
 
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimMontage.h"
+
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+
+	bUseControllerRotationYaw = false;
+
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 360.0f, 0.0f);
 
 	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
@@ -65,13 +74,6 @@ float AEnemyCharacter::TakeDamage(
 	AActor* DamageCauser
 )
 {
-	UE_LOG(
-		LogTemp,
-		Warning,
-		TEXT("Enemy TakeDamage: %f"),
-		DamageAmount
-	);
-
 	const float ActualDamage = Super::TakeDamage(
 		DamageAmount,
 		DamageEvent,
@@ -91,7 +93,47 @@ float AEnemyCharacter::TakeDamage(
 
 void AEnemyCharacter::Attack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Enemy Attack Called"));
+	if (LifeState == ELifeState::Dead)
+	{
+		return;
+	}
+
+	if (!CombatComponent || !AttackMontage)
+	{
+		return;
+	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (!AnimInstance)
+	{
+		return;
+	}
+
+	if (!CombatComponent->StartAttack())
+	{
+		return;
+	}
+
+	const float MontageLength = AnimInstance->Montage_Play(AttackMontage);
+
+	if (MontageLength <= 0.0f)
+	{
+		CombatComponent->EndAttack();
+		return;
+	}
+
+	FOnMontageEnded MontageEndedDelegate;
+
+	MontageEndedDelegate.BindUObject(
+		this,
+		&AEnemyCharacter::OnAttackMontageEnded
+	);
+
+	AnimInstance->Montage_SetEndDelegate(
+		MontageEndedDelegate,
+		AttackMontage
+	);
 }
 
 void AEnemyCharacter::Die()
@@ -201,5 +243,37 @@ void AEnemyCharacter::Deactivate()
 	if (CombatComponent)
 	{
 		CombatComponent->SetWeaponVisible(false);
+	}
+}
+
+void AEnemyCharacter::BeginAttackWindow()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->BeginAttackWindow();
+	}
+}
+
+void AEnemyCharacter::EndAttackWindow()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->EndAttackWindow();
+	}
+}
+
+void AEnemyCharacter::OnAttackMontageEnded(
+	UAnimMontage* Montage,
+	bool bInterrupted
+)
+{
+	if (Montage != AttackMontage)
+	{
+		return;
+	}
+
+	if (CombatComponent)
+	{
+		CombatComponent->EndAttack();
 	}
 }

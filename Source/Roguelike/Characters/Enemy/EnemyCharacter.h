@@ -14,6 +14,7 @@ class AEnemyCharacter;
 class UCombatComponent;
 class UHealthComponent;
 class UHealthBarComponent;
+class UAnimMontage;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 	FOnEnemyDead,
@@ -60,6 +61,12 @@ public:
 	void Activate();
 	void Deactivate();
 
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void BeginAttackWindow();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void EndAttackWindow();
+
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnEnemyDead OnEnemyDead;
@@ -67,6 +74,11 @@ public:
 protected:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void Die();
+
+	void OnAttackMontageEnded(
+		UAnimMontage* Montage,
+		bool bInterrupted
+	);
 
 private:
 	void TryDropItem();
@@ -90,4 +102,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UHealthBarComponent> HealthBarComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TObjectPtr<UAnimMontage> AttackMontage;
 };

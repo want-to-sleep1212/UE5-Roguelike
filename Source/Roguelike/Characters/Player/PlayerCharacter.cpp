@@ -21,6 +21,9 @@
 
 #include "Components/Health/HealthComponent.h"
 
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimMontage.h"
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -302,12 +305,43 @@ void APlayerCharacter::EndInvincible()
 
 void APlayerCharacter::AttackInput()
 {
-	if (!CombatComponent)
+	if (!CombatComponent || !AttackMontage)
 	{
 		return;
 	}
 
-	CombatComponent->StartAttack();
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (!AnimInstance)
+	{
+		return;
+	}
+
+	if (!CombatComponent->StartAttack())
+	{
+		return;
+	}
+
+	const float MontageLength = AnimInstance->Montage_Play(AttackMontage);
+
+	if (MontageLength <= 0.0f)
+	{
+		// 몽타주 재생 실패 시 공격 상태 복구
+		CombatComponent->EndAttack();
+		return;
+	}
+
+	FOnMontageEnded MontageEndedDelegate;
+
+	MontageEndedDelegate.BindUObject(
+		this,
+		&APlayerCharacter::OnAttackMontageEnded
+	);
+
+	AnimInstance->Montage_SetEndDelegate(
+		MontageEndedDelegate,
+		AttackMontage
+	);
 }
 
 void APlayerCharacter::LookInput(const FInputActionValue& Value)
@@ -407,4 +441,36 @@ bool APlayerCharacter::CanStartAttack() const
 	}
 
 	return true;
+}
+
+void APlayerCharacter::BeginAttackWindow()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->BeginAttackWindow();
+	}
+}
+
+void APlayerCharacter::EndAttackWindow()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->EndAttackWindow();
+	}
+}
+
+void APlayerCharacter::OnAttackMontageEnded(
+	UAnimMontage* Montage,
+	bool bInterrupted
+)
+{
+	if (Montage != AttackMontage)
+	{
+		return;
+	}
+
+	if (CombatComponent)
+	{
+		CombatComponent->EndAttack();
+	}
 }

@@ -9,8 +9,6 @@
 class UStaticMeshComponent;
 class UBoxComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEnded);
-
 UCLASS()
 class ROGUELIKE_API AWeaponActor : public AActor
 {
@@ -19,12 +17,8 @@ class ROGUELIKE_API AWeaponActor : public AActor
 public:
 	AWeaponActor();
 
-	void StartAttack();
-	void EndAttack();
-
-public:
-	UPROPERTY(BlueprintAssignable)
-	FOnAttackEnded OnAttackEnded;
+	void BeginAttackWindow();
+	void EndAttackWindow();
 
 protected:
 	virtual void BeginPlay() override;
@@ -55,11 +49,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	float AttackDamage = 10.f;
-
-	UPROPERTY(EditDefaultsOnly)
-	float AttackDuration = 0.5f;
-
-	FTimerHandle AttackTimerHandle;
 
 	bool bIsAttacking = false;
 

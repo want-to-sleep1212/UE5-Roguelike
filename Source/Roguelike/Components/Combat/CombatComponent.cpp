@@ -34,6 +34,14 @@ void UCombatComponent::BeginPlay()
 		return;
 	}
 
+	CombatStateOwner = Cast<ICombatStateInterface>(GetOwner());
+
+	if (!CombatStateOwner)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CombatComponent Owner does not implement CombatStateInterface"));
+		return;
+	}
+
 	if (!WeaponClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("WeaponClass is null"));
@@ -60,21 +68,6 @@ void UCombatComponent::BeginPlay()
 	);
 
 	CurrentWeapon->SetActorHiddenInGame(!bWeaponVisible);
-
-	CurrentWeapon->OnAttackEnded.AddDynamic(
-		this,
-		&UCombatComponent::EndAttack
-	);
-
-
-
-	CombatStateOwner = Cast<ICombatStateInterface>(GetOwner());
-
-	if (!CombatStateOwner)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("CombatComponent Owner does not implement CombatStateInterface"));
-		return;
-	}
 }
 
 
@@ -86,36 +79,36 @@ void UCombatComponent::BeginPlay()
 //	// ...
 //}
 
-void UCombatComponent::StartAttack()
+bool UCombatComponent::StartAttack()
 {
 	if (!CombatStateOwner || !CurrentWeapon)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("CombatStateOwner or CurrentWeapon is null"));
-		return;
+
+		return false;
 	}
 
 	if (!CombatStateOwner->CanStartAttack())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CombatStateOwner can't start attack"));
-		return;
+		return false;
 	}
 
 	if (CombatState != ECombatState::None)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("CombatState is not none"));
-		return;
+		return false;
 	}
 	
 	CombatState = ECombatState::Attack;
 
-	CurrentWeapon->StartAttack();
+	return true;
 }
 
 void UCombatComponent::EndAttack()
 {
-	if (!OwnerCharacter)
+	if (CurrentWeapon)
 	{
-		return;
+		// 몽타주가 AttackEnd Notify 전에 중단된 경우에 공격을 중단하기 위해 호출
+		CurrentWeapon->EndAttackWindow();
 	}
 
 	CombatState = ECombatState::None;
@@ -143,4 +136,34 @@ void UCombatComponent::SetWeaponVisible(bool bVisible)
 	}
 
 	CurrentWeapon->SetActorHiddenInGame(!bWeaponVisible);
+}
+
+void UCombatComponent::BeginAttackWindow()
+{
+	if (!CurrentWeapon || CombatState != ECombatState::Attack)
+	{
+		return;
+	}
+
+	CurrentWeapon->BeginAttackWindow();
+}
+
+void UCombatComponent::EndAttackWindow()
+{
+	if (!CurrentWeapon)
+	{
+		return;
+	}
+
+	CurrentWeapon->EndAttackWindow();
+}
+
+void UCombatComponent::InitializeWeapon()
+{
+
+}
+
+void UCombatComponent::EquipWeapon(AWeaponActor* NewWeapon)
+{
+
 }

@@ -20,6 +20,7 @@
 class UCombatComponent;
 class AWeaponActor;
 class UHealthComponent;
+class UAnimMontage;
 
 UCLASS()
 class ROGUELIKE_API APlayerCharacter
@@ -51,6 +52,12 @@ public:
 		AActor* DamageCauser
 	) override;
 
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void BeginAttackWindow();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void EndAttackWindow();
+
 	// getter
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float GetCurrentHealth() const;
@@ -68,6 +75,19 @@ public:
 	ELifeState GetLifeState() const;
 
 	virtual bool CanStartAttack() const override;
+
+protected:
+	void PlayAttackMontage();
+
+	UFUNCTION()
+	void OnAttackMontageEnded(
+		UAnimMontage* Montage,
+		bool bInterrupted
+	);
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TObjectPtr<UAnimMontage> AttackMontage;
 
 private:
 	// 입력
