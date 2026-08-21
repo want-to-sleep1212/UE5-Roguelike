@@ -2,83 +2,44 @@
 
 
 #include "Rooms/CombatRoomBase.h"
+
 #include "Characters/Enemy/EnemyCharacter.h"
-#include "Rooms/RoomDoor.h"
-#include "GameFramework/CharacterMovementComponent.h"
 
-void ACombatRoomBase::BeginPlay()
+#include "Components/SceneComponent.h"
+#include "Engine/World.h"
+
+ACombatRoomBase::ACombatRoomBase()
 {
-	Super::BeginPlay();
-
-	RegisterEnemies();
-	DeactivateEnemies();
+	PrimaryActorTick.bCanEverTick = false;
 }
 
-void ACombatRoomBase::RegisterEnemies()
+void ACombatRoomBase::RegisterEnemy(AEnemyCharacter* Enemy)
 {
-	for (AEnemyCharacter* Enemy : PlacedEnemies)
+	if (!Enemy)
 	{
-		if (Enemy == nullptr)
-		{
-			continue;
-		}
-
-		UE_LOG(LogTemp, Warning, TEXT("RegisterEnemy"));
-		AliveEnemies.Add(Enemy);
-
-		Enemy->OnEnemyDead.AddDynamic(
-			this,
-			&ACombatRoomBase::NotifyEnemyDead
-		);
+		return;
 	}
-}
 
-void ACombatRoomBase::ActivateEnemies()
-{
-	for (AEnemyCharacter* Enemy : AliveEnemies)
-	{
-		if (Enemy == nullptr)
-		{
-			continue;
-		}
+	AliveEnemies.Add(Enemy);
 
-		//UE_LOG(LogTemp, Warning, TEXT("ActivateEnemy: %s Location=%s Hidden=%d Collision=%d Tick=%d"),
-		//	*Enemy->GetName(),
-		//	*Enemy->GetActorLocation().ToString(),
-		//	Enemy->IsHidden(),
-		//	Enemy->GetActorEnableCollision(),
-		//	Enemy->IsActorTickEnabled()
-		//);
-		Enemy->Activate();
-	}
-}
-
-void ACombatRoomBase::DeactivateEnemies()
-{
-	for (AEnemyCharacter* Enemy : AliveEnemies)
-	{
-		if (Enemy == nullptr)
-		{
-			continue;
-		}
-		//UE_LOG(LogTemp, Warning, TEXT("DeactivateEnemy: %s"), *Enemy->GetName());
-
-		Enemy->Deactivate();
-	}
+	Enemy->OnEnemyDead.AddDynamic(
+		this,
+		&ACombatRoomBase::NotifyEnemyDead
+	);
 }
 
 void ACombatRoomBase::NotifyEnemyDead(AEnemyCharacter* Enemy)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("NotifyEnemyDead"));
 
-	if (Enemy == nullptr)
+	if (!Enemy)
 	{
 		return;
 	}
 
 	AliveEnemies.Remove(Enemy);
 
-	if (AliveEnemies.Num() == 0)
+	if (AliveEnemies.IsEmpty())
 	{
 		ClearRoom();
 	}
@@ -86,12 +47,12 @@ void ACombatRoomBase::NotifyEnemyDead(AEnemyCharacter* Enemy)
 
 bool ACombatRoomBase::StartRoom()
 {
-	if (Super::StartRoom() == false)
+	if (!Super::StartRoom())
 	{
 		return false;
 	}
 
-	ActivateEnemies();
+	SpawnEnemies();
 	CloseDoors();
 
 	return true;
@@ -99,7 +60,7 @@ bool ACombatRoomBase::StartRoom()
 
 bool ACombatRoomBase::ClearRoom()
 {
-	if (Super::ClearRoom() == false)
+	if (!Super::ClearRoom())
 	{
 		return false;
 	}
@@ -108,3 +69,6 @@ bool ACombatRoomBase::ClearRoom()
 
 	return true;
 }
+
+// overriding을 위해 남겨둠
+void ACombatRoomBase::SpawnEnemies() {}

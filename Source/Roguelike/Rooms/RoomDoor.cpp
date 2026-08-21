@@ -9,8 +9,11 @@ ARoomDoor::ARoomDoor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
+	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+	SetRootComponent(SceneRoot);
+
 	DoorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorMesh"));
-	RootComponent = DoorMesh;
+	DoorMesh->SetupAttachment(SceneRoot);
 }
 
 //// Called when the game starts or when spawned

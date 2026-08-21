@@ -10,6 +10,8 @@
 #include "RoomBase.generated.h"
 
 class ARoomDoor;
+class USceneComponent;
+class UBoxComponent;
 
 UCLASS(Abstract)
 class ROGUELIKE_API ARoomBase : public AActor
@@ -31,6 +33,8 @@ public:
 public:
 	virtual bool StartRoom();
 	virtual bool ClearRoom();
+
+	void RegisterDoor(ARoomDoor* Door);
 
 protected:
 	UFUNCTION()
@@ -56,6 +60,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	ERoomState RoomState = ERoomState::Waiting;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	class UBoxComponent* RoomTrigger;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Room")
+	TObjectPtr<USceneComponent> SceneRoot;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Room")
+	TObjectPtr<UBoxComponent> RoomTrigger;
 };

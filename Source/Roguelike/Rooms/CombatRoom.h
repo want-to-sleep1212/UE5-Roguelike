@@ -15,5 +15,14 @@ class ROGUELIKE_API ACombatRoom : public ACombatRoomBase
 	GENERATED_BODY()
 	
 protected:
-	virtual bool StartRoom() override;
+	virtual void SpawnEnemies() override;
+
+protected:
+	// 한 방에서 생성할 최소 적 수
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enemy|Spawn")
+	int32 MinEnemyCount = 1;
+
+	// 한 방에서 생성할 최대 적 수
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enemy|Spawn")
+	int32 MaxEnemyCount = 3;
 };

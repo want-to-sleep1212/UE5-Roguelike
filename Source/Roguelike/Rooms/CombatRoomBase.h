@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 #include "Rooms/RoomBase.h"
 
-class AEnemyCharacter;
-
 #include "CombatRoomBase.generated.h"
+
+class AEnemyCharacter;
 
 /**
  * 
@@ -17,14 +17,11 @@ class ROGUELIKE_API ACombatRoomBase : public ARoomBase
 {
 	GENERATED_BODY()
 	
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+public:
+	ACombatRoomBase();
 
 protected:
-	virtual void RegisterEnemies();
-	virtual void ActivateEnemies();
-	virtual void DeactivateEnemies();
+	virtual void RegisterEnemy(AEnemyCharacter* Enemy);
 
 	UFUNCTION()
 	virtual void NotifyEnemyDead(AEnemyCharacter* Enemy);
@@ -32,9 +29,14 @@ protected:
 	virtual bool StartRoom() override;
 	virtual bool ClearRoom() override;
 
+	virtual void SpawnEnemies();
+
 protected:
-	UPROPERTY(EditAnywhere)
-	TArray<AEnemyCharacter*> PlacedEnemies;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy")
+	TSubclassOf<AEnemyCharacter> EnemyClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enemy")
+	FName EnemySpawnPointTag = TEXT("EnemySpawnPoint");
 
 	UPROPERTY()
 	TArray<AEnemyCharacter*> AliveEnemies;

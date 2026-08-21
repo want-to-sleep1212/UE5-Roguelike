@@ -8,18 +8,23 @@
 
 #include "Characters/Player/PlayerCharacter.h"
 
+#define ECC_Player ECC_GameTraceChannel1
+
 // Sets default values
 ARoomBase::ARoomBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
+	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+	SetRootComponent(SceneRoot);
+
 	RoomTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("RoomTrigger"));
-	RootComponent = RoomTrigger;
+	RoomTrigger->SetupAttachment(SceneRoot);
 
 	RoomTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	RoomTrigger->SetCollisionResponseToAllChannels(ECR_Ignore);
-	RoomTrigger->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	RoomTrigger->SetCollisionResponseToChannel(ECC_Player, ECR_Overlap);
 
 	RoomTrigger->SetHiddenInGame(false);
 }
@@ -51,7 +56,6 @@ bool ARoomBase::ClearRoom()
 		return false;
 	}
 
-	//UE_LOG(LogTemp, Warning, TEXT("ClearRoom"));
 	RoomState = ERoomState::Cleared;
 
 	bCleared = true;
@@ -71,6 +75,16 @@ bool ARoomBase::StartRoom()
 	return true;
 }
 
+void ARoomBase::RegisterDoor(ARoomDoor* Door)
+{
+	if (!IsValid(Door))
+	{
+		return;
+	}
+
+	Doors.AddUnique(Door);
+}
+
 void ARoomBase::OnRoomTriggerBeginOverlap(
 	UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,
@@ -80,16 +94,22 @@ void ARoomBase::OnRoomTriggerBeginOverlap(
 	const FHitResult& SweepResult
 )
 {
+	UE_LOG(LogTemp, Warning, TEXT("Overlapped RoomTrigger"));
+
 	if (RoomState != ERoomState::Waiting)
 	{
 		return;
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Pass RoomState"));
 
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 	if (Player == nullptr)
 	{
 		return;
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Pass Player Casting"));
 
 	StartRoom();
 }

@@ -28,9 +28,13 @@ public:
 	void OpenDoor();
 	void CloseDoor();
 
-private:
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Door")
+	USceneComponent* SceneRoot;
+
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* DoorMesh;
 
+private:
 	bool bIsOpen = false;
 };
