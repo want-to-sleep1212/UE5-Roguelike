@@ -39,11 +39,6 @@ public:
 	void SetWeaponVisible(bool bVisible);
 
 private:
-
-	void InitializeWeapon();
-	void EquipWeapon(AWeaponActor* NewWeapon);
-
-private:
 	UPROPERTY()
 	ACharacter* OwnerCharacter;
 

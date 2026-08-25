@@ -20,11 +20,7 @@ void ARoguelikePlayerController::BeginPlay()
 
 	if (!PlayerMainUIClass)
 	{
-		UE_LOG(
-			LogTemp,
-			Warning,
-			TEXT("PlayerMainUIClass is not assigned")
-		);
+		UE_LOG(LogTemp, Warning, TEXT("PlayerMainUIClass is not assigned"));
 
 		return;
 	}
@@ -36,11 +32,7 @@ void ARoguelikePlayerController::BeginPlay()
 
 	if (!PlayerMainUI)
 	{
-		UE_LOG(
-			LogTemp,
-			Error,
-			TEXT("Failed to create PlayerMainUI")
-		);
+		UE_LOG(LogTemp, Error, TEXT("Failed to create PlayerMainUI"));
 
 		return;
 	}

@@ -291,8 +291,6 @@ void APlayerCharacter::EndDash()
 	{
 		MovementState = EMovementState::Move;
 	}
-
-	// TODO: 무적 컴포넌트 방식이면 타이머로 자동 해제하거나 여기서 해제
 }
 
 void APlayerCharacter::EndInvincible()
@@ -386,8 +384,6 @@ void APlayerCharacter::Die()
 	}
 
 	LifeState = ELifeState::Dead;
-
-	UE_LOG(LogTemp, Warning, TEXT("Player Dead"));
 
 	// 우선은 입력/이동만 막아두기
 	GetCharacterMovement()->DisableMovement();

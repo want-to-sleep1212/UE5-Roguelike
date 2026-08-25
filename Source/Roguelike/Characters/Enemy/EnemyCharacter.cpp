@@ -53,20 +53,6 @@ void AEnemyCharacter::BeginPlay()
 	}
 }
 
-//// Called every frame
-//void AEnemyCharacter::Tick(float DeltaTime)
-//{
-//	Super::Tick(DeltaTime);
-//
-//}
-
-// Called to bind functionality to input
-void AEnemyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-
 float AEnemyCharacter::TakeDamage(
 	float DamageAmount,
 	struct FDamageEvent const& DamageEvent,
@@ -93,11 +79,6 @@ float AEnemyCharacter::TakeDamage(
 
 void AEnemyCharacter::Attack()
 {
-	if (LifeState == ELifeState::Dead)
-	{
-		return;
-	}
-
 	if (!CombatComponent || !AttackMontage)
 	{
 		return;
@@ -138,21 +119,12 @@ void AEnemyCharacter::Attack()
 
 void AEnemyCharacter::Die()
 {
-	//UE_LOG(
-	//	LogTemp,
-	//	Warning,
-	//	TEXT("%s Died"),
-	//	*GetName()
-	//);
-
 	if (LifeState == ELifeState::Dead)
 	{
 		return;
 	}
 
 	LifeState = ELifeState::Dead;
-
-	UE_LOG(LogTemp, Warning, TEXT("Enemy Die"));
 
 	// Destroy 전에 호출
 	TryDropItem();
@@ -174,7 +146,6 @@ void AEnemyCharacter::TryDropItem()
 
 	if (RandomValue > DropChance)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Item drop failed. Random: %.2f, Chance: %.2f"), RandomValue, DropChance);
 		return;
 	}
 
@@ -190,17 +161,13 @@ void AEnemyCharacter::TryDropItem()
 		FRotator::ZeroRotator,
 		SpawnParams
 	);
-
-	if (DroppedItem != nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Enemy dropped item"));
-	}
 }
 
 bool AEnemyCharacter::CanStartAttack() const
 {
 	if (LifeState == ELifeState::Dead)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Enemy is already dead"));
 		return false;
 	}
 

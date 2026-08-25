@@ -65,7 +65,6 @@ void ARoomManager::GenerateMapLayout()
 		const int32 DirectionIndex = FMath::RandRange(0, 3);
 
 		const int32 NextX = CurrentX + Directions[DirectionIndex].X;
-
 		const int32 NextY = CurrentY + Directions[DirectionIndex].Y;
 
 		if (!IsValidPosition(NextX, NextY))

@@ -7,10 +7,8 @@
 #include "Characters/Player/PlayerCharacter.h"
 #include "Components/Health/HealthComponent.h"
 
-// Sets default values
 AHealItem::AHealItem()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	PickupCollision = CreateDefaultSubobject<USphereComponent>(TEXT("PickupCollision"));
@@ -28,7 +26,6 @@ AHealItem::AHealItem()
 
 }
 
-// Called when the game starts or when spawned
 void AHealItem::BeginPlay()
 {
 	Super::BeginPlay();
@@ -38,13 +35,6 @@ void AHealItem::BeginPlay()
 		&AHealItem::OnOverlapBegin
 	);
 }
-
-//// Called every frame
-//void AHealItem::Tick(float DeltaTime)
-//{
-//	Super::Tick(DeltaTime);
-//
-//}
 
 void AHealItem::OnOverlapBegin(
 	UPrimitiveComponent* OverlappedComponent,

@@ -45,7 +45,6 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(
 
 	if (!Enemy->CanStartAttack())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Enemy can't StartAttack"));
 		return EBTNodeResult::Failed;
 	}
 

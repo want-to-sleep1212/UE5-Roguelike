@@ -94,22 +94,17 @@ void ARoomBase::OnRoomTriggerBeginOverlap(
 	const FHitResult& SweepResult
 )
 {
-	UE_LOG(LogTemp, Warning, TEXT("Overlapped RoomTrigger"));
 
 	if (RoomState != ERoomState::Waiting)
 	{
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Pass RoomState"));
-
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 	if (Player == nullptr)
 	{
 		return;
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Pass Player Casting"));
 
 	StartRoom();
 }

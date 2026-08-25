@@ -157,13 +157,3 @@ void UCombatComponent::EndAttackWindow()
 
 	CurrentWeapon->EndAttackWindow();
 }
-
-void UCombatComponent::InitializeWeapon()
-{
-
-}
-
-void UCombatComponent::EquipWeapon(AWeaponActor* NewWeapon)
-{
-
-}
