@@ -21,6 +21,7 @@ class UCombatComponent;
 class AWeaponActor;
 class UHealthComponent;
 class UAnimMontage;
+class UDataTable;
 
 UCLASS()
 class ROGUELIKE_API APlayerCharacter
@@ -133,7 +134,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", meta = (AllowPrivateAccess = "true"))
 	ELifeState LifeState = ELifeState::Alive;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "StatusEffect", meta = (AllowPrivateAccess = "true"))
 	TArray<FStatusEffect> ActiveEffects;
 
 	// 이동
@@ -161,4 +162,8 @@ private:
 	// 전투
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UCombatComponent* CombatComponent;
+
+	// 플레이어 데이터
+	UPROPERTY(EditDefaultsOnly, Category = "Data")
+	TObjectPtr<UDataTable> CharacterStatTable;
 };

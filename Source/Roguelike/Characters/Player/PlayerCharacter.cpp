@@ -24,6 +24,9 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
 
+#include "Engine/DataTable.h"
+#include "Data/CharacterStatData.h"
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -55,7 +58,6 @@ APlayerCharacter::APlayerCharacter()
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
-// Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -67,15 +69,22 @@ void APlayerCharacter::BeginPlay()
 			&APlayerCharacter::Die
 		);
 	}
+
+	if (CharacterStatTable && HealthComponent)
+	{
+		const FCharacterStatData* PlayerStat =
+			CharacterStatTable->FindRow<FCharacterStatData>(
+				FName(TEXT("Player")),
+				TEXT("PlayerCharacter")
+			);
+
+		if (PlayerStat)
+		{
+			HealthComponent->InitializeHealth(PlayerStat->MaxHealth);
+		}
+	}
 }
 
-// Called every frame
-//void APlayerCharacter::Tick(float DeltaTime)
-//{
-//	Super::Tick(DeltaTime);
-//}
-
-// Called to bind functionality to input
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -253,6 +262,8 @@ void APlayerCharacter::DashInput()
 	SetActorRotation(DashDirection.Rotation());
 
 	// 무적 상태 추가
+	// 아직은 데미지가 들어옴
+	// 추후에 수정해야 함
 	ActiveEffects.Add(FStatusEffect(
 		EStatusEffectType::Invincible,
 		DashInvincibleTime

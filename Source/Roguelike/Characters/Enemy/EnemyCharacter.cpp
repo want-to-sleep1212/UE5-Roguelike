@@ -14,6 +14,9 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
 
+#include "Engine/DataTable.h"
+#include "Data/CharacterStatData.h"
+
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -50,6 +53,22 @@ void AEnemyCharacter::BeginPlay()
 			this,
 			&AEnemyCharacter::Die
 		);
+	}
+
+	StatRowName = FName(TEXT("Enemy"));
+
+	if (CharacterStatTable && CharacterHealthComponent)
+	{
+		const FCharacterStatData* EnemyStat =
+			CharacterStatTable->FindRow<FCharacterStatData>(
+				StatRowName,
+				TEXT("EnemyCharacter")
+			);
+
+		if (EnemyStat)
+		{
+			CharacterHealthComponent->InitializeHealth(EnemyStat->MaxHealth);
+		}
 	}
 }
 

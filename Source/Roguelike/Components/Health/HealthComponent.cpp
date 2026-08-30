@@ -13,31 +13,6 @@ UHealthComponent::UHealthComponent()
 	// ...
 }
 
-
-// Called when the game starts
-void UHealthComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	CurrentHealth = MaxHealth;
-	bDead = false;
-
-	OnHealthChanged.Broadcast(
-		CurrentHealth,
-		MaxHealth,
-		0.0f
-	);
-}
-
-
-//// Called every frame
-//void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-//{
-//	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-//
-//	// ...
-//}
-
 void UHealthComponent::Heal(float HealAmount)
 {
 	if (HealAmount <= 0.0f || bDead)
@@ -106,4 +81,17 @@ float UHealthComponent::GetMaxHealth() const
 bool UHealthComponent::IsDead() const
 {
 	return bDead;
+}
+
+void UHealthComponent::InitializeHealth(float InMaxHealth)
+{
+	MaxHealth = FMath::Max(0.0f, InMaxHealth);
+	CurrentHealth = MaxHealth;
+	bDead = false;
+
+	OnHealthChanged.Broadcast(
+		CurrentHealth,
+		MaxHealth,
+		0.0f
+	);
 }

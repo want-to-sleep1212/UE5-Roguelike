@@ -21,16 +21,7 @@ class ROGUELIKE_API UHealthComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	UHealthComponent();
-
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
@@ -48,6 +39,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Health")
 	bool IsDead() const;
 
+	void InitializeHealth(float InMaxHealth);
+
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Health")
 	FOnHealthChanged OnHealthChanged;
@@ -59,8 +52,8 @@ private:
 	void ChangeHealth(float Amount);
 
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true", ClampMin = "1.0"))
-	float MaxHealth = 100.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true", ClampMin = "1.0"))
+	float MaxHealth = 0.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
 	float CurrentHealth = 0.0f;

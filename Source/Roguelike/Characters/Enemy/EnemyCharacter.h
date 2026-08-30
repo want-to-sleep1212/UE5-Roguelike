@@ -15,6 +15,7 @@ class UCombatComponent;
 class UHealthComponent;
 class UHealthBarComponent;
 class UAnimMontage;
+class UDataTable;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 	FOnEnemyDead,
@@ -74,6 +75,13 @@ protected:
 		UAnimMontage* Montage,
 		bool bInterrupted
 	);
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Data")
+	TObjectPtr<UDataTable> CharacterStatTable;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Data")
+	FName StatRowName;
 
 private:
 	void TryDropItem();
