@@ -122,4 +122,12 @@ private:
 	TArray<ERoomType> RoomTypes;
 
 	int32 GeneratedRoomCount = 0;
+
+	UPROPERTY(EditAnywhere, Category = "Room|Random")
+	int32 Seed = 12345;
+
+	UPROPERTY(EditAnywhere, Category = "Room|Random")
+	bool bUseRandomSeed = true;
+
+	FRandomStream RandomStream;
 };

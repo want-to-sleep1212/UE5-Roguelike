@@ -41,7 +41,12 @@ flowchart TD
 void ARoomManager::BeginPlay()
 {
     Super::BeginPlay();
+    
+    if (bUseRandomSeed)
+        Seed = FMath::Rand();
 
+    RandomStream.Initialize(Seed);
+    
     InitializeMap();
     GenerateMapLayout();
     AssignRoomTypes();
@@ -85,7 +90,7 @@ Map[CurrentY][CurrentX] = GeneratedRoomCount++;
 
 while (GeneratedRoomCount < RoomCount)
 {
-    const int32 DirectionIndex = FMath::RandRange(0, 3);
+    const int32 DirectionIndex = RandomStream.RandRange(0, 3);
     const int32 NextX = CurrentX + Directions[DirectionIndex].X;
     const int32 NextY = CurrentY + Directions[DirectionIndex].Y;
 
@@ -263,6 +268,9 @@ const int32 SpawnCount = FMath::Min(
 
 - **Spawn Point는 Blueprint에서 배치**  
   C++은 `EnemySpawnPoint` 태그가 붙은 Component를 수집하고, 실제 위치는 각 Room Blueprint에서 조정합니다. 방 구조가 달라져도 C++ 코드를 수정하지 않고 적 생성 위치를 변경할 수 있습니다.
+- Seed 기반 던전 재현  
+절차적 던전 생성 과정은 FRandomStream을 사용하도록 구성했습니다. 실행 시 사용한 Seed를 로그로 남기고, 필요할 경우 동일한 Seed를 지정하여 같은 던전 배치와 랜덤 방 선택 결과를 재현할 수 있습니다.  
+이를 통해 랜덤 생성 과정에서 문제가 발생했을 때 동일한 조건으로 다시 실행하여 원인을 확인할 수 있도록 했습니다.
 ## 개발 중 문제와 해결
 
 ### 공유 경계 중복 생성 문제

@@ -13,6 +13,15 @@ void ARoomManager::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (bUseRandomSeed)
+	{
+		Seed = FMath::Rand();
+	}
+
+	RandomStream.Initialize(Seed);
+
+	UE_LOG(LogTemp, Log, TEXT("RoomManager: Dungeon Seed = %d"), Seed);
+
 	InitializeMap();
 	GenerateMapLayout();
 	AssignRoomTypes();
@@ -21,7 +30,20 @@ void ARoomManager::BeginPlay()
 
 	int32 StartRoomIndex = 0;
 
-	Rooms[StartRoomIndex]->StartRoom();
+	if (!Rooms.IsValidIndex(StartRoomIndex) ||
+		!IsValid(Rooms[StartRoomIndex]))
+	{
+		UE_LOG(LogTemp, Error, TEXT("RoomManager: StartRoom is invalid."));
+
+		return;
+	}
+
+	if (!Rooms[StartRoomIndex]->StartRoom())
+	{
+		UE_LOG(LogTemp, Error, TEXT("RoomManager: Failed to start StartRoom."));
+
+		return;
+	}
 }
 
 void ARoomManager::InitializeMap()
@@ -62,7 +84,7 @@ void ARoomManager::GenerateMapLayout()
 
 	while (GeneratedRoomCount < RoomCount)
 	{
-		const int32 DirectionIndex = FMath::RandRange(0, 3);
+		const int32 DirectionIndex = RandomStream.RandRange(0, 3);
 
 		const int32 NextX = CurrentX + Directions[DirectionIndex].X;
 		const int32 NextY = CurrentY + Directions[DirectionIndex].Y;
@@ -201,8 +223,6 @@ void ARoomManager::CreateRoomBoundaries()
 			{
 				continue;
 			}
-
-
 
 			// North는 항상 현재 Room이 담당
 			ARoomBase* NorthRoom = GetRoomAt(X + 1, Y);
@@ -578,7 +598,7 @@ int32 ARoomManager::FindRandomRoomIndexExcept(
 		return INDEX_NONE;
 	}
 
-	const int32 RandomIndex = FMath::RandRange(0, Candidates.Num() - 1);
+	const int32 RandomIndex = RandomStream.RandRange(0, Candidates.Num() - 1);
 
 	return Candidates[RandomIndex];
 }

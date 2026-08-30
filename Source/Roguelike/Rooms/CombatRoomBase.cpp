@@ -30,8 +30,6 @@ void ACombatRoomBase::RegisterEnemy(AEnemyCharacter* Enemy)
 
 void ACombatRoomBase::NotifyEnemyDead(AEnemyCharacter* Enemy)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("NotifyEnemyDead"));
-
 	if (!Enemy)
 	{
 		return;
@@ -52,8 +50,8 @@ bool ACombatRoomBase::StartRoom()
 		return false;
 	}
 
-	SpawnEnemies();
 	CloseDoors();
+	SpawnEnemies();
 
 	return true;
 }

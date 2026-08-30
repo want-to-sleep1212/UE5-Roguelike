@@ -2,8 +2,6 @@
 
 Unreal Engine 5 C++로 구현한 로그라이크 프로토타입입니다. 실행 시 격자 위에 연결된 방을 생성하고, 시작·전투·상점·보스 방을 배정한 뒤 벽과 공유 문을 구성합니다. 플레이어와 적은 같은 전투·체력 컴포넌트를 사용하며, 전투방에서는 입장 시 적을 생성하고 모든 적이 사망하면 문을 다시 엽니다.
 
-> 이 문서는 `main` 브랜치의 `e93b3c6` 커밋을 기준으로 C++ 소스, 프로젝트 설정, Git 이력과 저장된 Blueprint/Behavior Tree를 확인해 작성했습니다. 
-
 ## 개발 환경 및 기술
 
 | 구분 | 저장소에서 확인된 내용 |
@@ -26,48 +24,40 @@ Unreal Engine 5 C++로 구현한 로그라이크 프로토타입입니다. 실�
 | 적 AI | Blackboard의 목표와 공격 범위 상태를 Behavior Tree의 이동·회전·공격 노드에서 사용합니다. | [Enemy AI](Docs/EnemyAI.md) |
 | 체력과 UI | 체력 변경과 사망을 `UHealthComponent`에 모으고 Delegate로 캐릭터 및 UI에 전달합니다. | [Health & UI](Docs/HealthAndUI.md) |
 
-## ## 전체 구조
+##  전체 구조
 
 프로젝트의 주요 시스템은 **던전/방 관리**, **캐릭터 전투**, **체력 및 UI** 세 영역으로 나뉩니다.
 
 ### 클래스 및 책임 구조
 
 ```mermaid
-flowchart TD
-    RM["ARoomManager<br/>맵 생성 / 방 타입 배정 / 방·벽·문 생성"]
-    RB["ARoomBase<br/>방 상태 / Door 관리"]
-    CR["ACombatRoomBase<br/>Enemy Spawn / 등록 / 전멸 관리"]
+flowchart TB
 
-    PC["APlayerCharacter"]
-    EC["AEnemyCharacter"]
+    %% Room System
+    RM[ARoomManager]
+    RB[ARoomBase]
+    CR[ACombatRoomBase]
+    EC[AEnemyCharacter]
 
-    PCC["UCombatComponent"]
-    ECC["UCombatComponent"]
+    RM -->|생성 / 관리| RB
+    RB -->|상속| CR
+    CR -->|Spawn / 등록| EC
 
-    PHC["UHealthComponent"]
-    EHC["UHealthComponent"]
+    EC -->|Component| ECC[UCombatComponent]
+    EC -->|Component| EHC[UHealthComponent]
 
-    PW["AWeaponActor"]
-    EW["AWeaponActor"]
+    ECC -->|무기 관리| EW[AWeaponActor]
+    EHC -->|UI 갱신| EUI[Enemy HealthBar]
 
-    PUI["Player UI"]
-    EUI["Enemy HealthBar"]
 
-    RM --> RB
-    RB --> CR
-    CR --> EC
+    %% Player System
+    PC[APlayerCharacter]
 
-    PC --> PCC
-    PC --> PHC
+    PC -->|Component| PCC[UCombatComponent]
+    PC -->|Component| PHC[UHealthComponent]
 
-    EC --> ECC
-    EC --> EHC
-
-    PCC --> PW
-    ECC --> EW
-
-    PHC --> PUI
-    EHC --> EUI
+    PCC -->|무기 관리| PW[AWeaponActor]
+    PHC -->|UI 갱신| PUI[Player UI]
 ```
 
 * `ARoomManager`는 2차원 격자 맵 생성, 방 타입 배정, Room Actor 생성과 벽·문 구성을 담당합니다.
@@ -150,9 +140,4 @@ flowchart TD
 | UI | `Source/Roguelike/UI/**`, `Core/PlayerController/RoguelikePlayerController.*` |
 | Blueprint/BT | `Content/Rooms/Blueprints`, `Content/AI`, `Content/UI/Widgets`, `Content/Characters/**/Animations` |
 
-## 현재 저장소에 미구현된 내용들
-
-- Shop 방은 RoomTrigger 발동 시 클리어되어 문을 열며, 상품 생성·구매 로직은 현재 소스에 없습니다.
-- Player 사망 시 이동을 비활성화하지만, 코드 주석에 남아 있는 게임 오버 UI·리스폰 처리는 구현되어 있지 않습니다.
-- AI는 첫 번째 Player Pawn을 목표로 설정하며, AI Perception을 이용한 별도 탐지 시스템은 없습니다.
 

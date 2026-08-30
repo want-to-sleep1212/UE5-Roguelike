@@ -51,8 +51,6 @@ protected:
 	void OpenDoors();
 
 protected:
-	UPROPERTY(VisibleAnywhere)
-	bool bCleared = false;
 
 	UPROPERTY(EditAnywhere)
 	TArray<ARoomDoor*> Doors;

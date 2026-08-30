@@ -104,4 +104,9 @@ void ACombatRoom::SpawnEnemies()
 
 		UE_LOG(LogTemp, Log, TEXT("%s: Spawned Enemy %s at %s"), *GetName(), *SpawnedEnemy->GetName(), *SpawnPoint->GetName());
 	}
+
+	if (AliveEnemies.IsEmpty())
+	{
+		ClearRoom();
+	}
 }

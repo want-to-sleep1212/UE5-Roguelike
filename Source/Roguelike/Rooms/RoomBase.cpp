@@ -58,8 +58,6 @@ bool ARoomBase::ClearRoom()
 
 	RoomState = ERoomState::Cleared;
 
-	bCleared = true;
-
 	return true;
 }
 
