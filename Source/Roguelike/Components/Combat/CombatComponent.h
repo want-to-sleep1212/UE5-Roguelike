@@ -38,6 +38,8 @@ public:
 
 	void SetWeaponVisible(bool bVisible);
 
+	void IncreaseAttackDamage(float Amount);
+
 private:
 	UPROPERTY()
 	ACharacter* OwnerCharacter;

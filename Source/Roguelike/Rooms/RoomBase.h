@@ -38,7 +38,7 @@ public:
 
 protected:
 	UFUNCTION()
-	void OnRoomTriggerBeginOverlap(
+	virtual void OnRoomTriggerBeginOverlap(
 		UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,

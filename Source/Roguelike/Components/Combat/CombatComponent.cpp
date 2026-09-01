@@ -157,3 +157,13 @@ void UCombatComponent::EndAttackWindow()
 
 	CurrentWeapon->EndAttackWindow();
 }
+
+void UCombatComponent::IncreaseAttackDamage(float Amount)
+{
+	if (Amount <= 0.0f || !CurrentWeapon)
+	{
+		return;
+	}
+
+	CurrentWeapon->IncreaseAttackDamage(Amount);
+}

@@ -41,6 +41,8 @@ public:
 
 	void InitializeHealth(float InMaxHealth);
 
+	void IncreaseMaxHealth(float Amount);
+
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Health")
 	FOnHealthChanged OnHealthChanged;

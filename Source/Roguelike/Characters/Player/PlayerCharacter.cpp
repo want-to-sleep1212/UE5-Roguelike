@@ -481,3 +481,51 @@ void APlayerCharacter::OnAttackMontageEnded(
 		CombatComponent->EndAttack();
 	}
 }
+
+void APlayerCharacter::AddGold(int32 Amount)
+{
+	if (Amount <= 0)
+	{
+		return;
+	}
+
+	ChangeGold(Amount);
+}
+
+bool APlayerCharacter::SpendGold(int32 Amount)
+{
+	if (Amount <= 0)
+	{
+		return false;
+	}
+
+	if (Gold < Amount)
+	{
+		return false;
+	}
+
+	ChangeGold(-Amount);
+
+	return true;
+}
+
+void APlayerCharacter::ChangeGold(int32 Amount)
+{
+	Gold += Amount;
+	OnGoldChanged.Broadcast(Gold);
+}
+
+int32 APlayerCharacter::GetGold() const
+{
+	return Gold;
+}
+
+UHealthComponent* APlayerCharacter::GetHealthComponent() const
+{
+	return HealthComponent;
+}
+
+UCombatComponent* APlayerCharacter::GetCombatComponent() const
+{
+	return CombatComponent;
+}

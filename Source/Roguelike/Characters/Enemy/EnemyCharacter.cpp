@@ -17,6 +17,8 @@
 #include "Engine/DataTable.h"
 #include "Data/CharacterStatData.h"
 
+#include "Characters/Player/PlayerCharacter.h"
+
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -79,6 +81,11 @@ float AEnemyCharacter::TakeDamage(
 	AActor* DamageCauser
 )
 {
+	if (!CharacterHealthComponent || CharacterHealthComponent->IsDead())
+	{
+		return 0.0f;
+	}
+
 	const float ActualDamage = Super::TakeDamage(
 		DamageAmount,
 		DamageEvent,
@@ -90,6 +97,8 @@ float AEnemyCharacter::TakeDamage(
 	{
 		return 0.0f;
 	}
+
+	LastDamageInstigator = EventInstigator;
 
 	CharacterHealthComponent->ApplyDamage(ActualDamage);
 
@@ -144,6 +153,15 @@ void AEnemyCharacter::Die()
 	}
 
 	LifeState = ELifeState::Dead;
+
+	if (LastDamageInstigator.IsValid())
+	{
+		if (APlayerCharacter* PlayerCharacter =
+			Cast<APlayerCharacter>(LastDamageInstigator->GetPawn()))
+		{
+			PlayerCharacter->AddGold(10);
+		}
+	}
 
 	// Destroy 전에 호출
 	TryDropItem();

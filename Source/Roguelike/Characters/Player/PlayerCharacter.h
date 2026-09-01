@@ -23,6 +23,14 @@ class UHealthComponent;
 class UAnimMontage;
 class UDataTable;
 
+class UInputMappingContext;
+class UInputAction;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
+	FOnGoldChanged,
+	int32, CurrentGold
+);
+
 UCLASS()
 class ROGUELIKE_API APlayerCharacter
 	: public ACharacter
@@ -40,6 +48,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
+	// damage
 	virtual float TakeDamage(
 		float DamageAmount,
 		struct FDamageEvent const& DamageEvent,
@@ -47,13 +56,28 @@ public:
 		AActor* DamageCauser
 	) override;
 
+	// combat
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void BeginAttackWindow();
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void EndAttackWindow();
 
+	virtual bool CanStartAttack() const override;
+
+	UFUNCTION()
+	void OnAttackMontageEnded(
+		UAnimMontage* Montage,
+		bool bInterrupted
+	);
+
+	// gold
+	void AddGold(int32 Amount);
+	bool SpendGold(int32 Amount);
+
 	// getter
+	UHealthComponent* GetHealthComponent() const;
+
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float GetCurrentHealth() const;
 
@@ -69,62 +93,61 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "State")
 	ELifeState GetLifeState() const;
 
-	virtual bool CanStartAttack() const override;
+	int32 GetGold() const;
 
-	UFUNCTION()
-	void OnAttackMontageEnded(
-		UAnimMontage* Montage,
-		bool bInterrupted
-	);
+	UCombatComponent* GetCombatComponent() const;
+
+public:
+	UPROPERTY(BlueprintAssignable, Category = "Gold")
+	FOnGoldChanged OnGoldChanged;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TObjectPtr<UAnimMontage> AttackMontage;
 
 private:
-	// 입력
 	void MoveInput(const FInputActionValue& Value);
 	void MoveInputCompleted(const FInputActionValue& Value);
 	void DashInput();
 	void AttackInput();
 	void LookInput(const FInputActionValue& Value);
 
-	// 대쉬
 	void EndDash();
 
-	// 무적
 	void EndInvincible();
 
 	UFUNCTION()
 	void Die();
 
+	void ChangeGold(int32 Amount);
+
 private:
-	// 카메라
+	// camera
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
-	// 입력
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputMappingContext* IMC_Character;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* IA_Move;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* IA_Dash;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* IA_Attack;
+	// input
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputMappingContext> IMC_Character;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	class UInputAction* IA_Look;
+	TObjectPtr<UInputAction> IA_Move;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> IA_Dash;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> IA_Attack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> IA_Look;
 
 	FVector2D MoveInputValue;
 
-	// 상태
+	// state
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", meta = (AllowPrivateAccess = "true"))
 	EMovementState MovementState = EMovementState::Idle;
 
@@ -137,10 +160,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "StatusEffect", meta = (AllowPrivateAccess = "true"))
 	TArray<FStatusEffect> ActiveEffects;
 
-	// 이동
+	// movement
 	FVector LastMoveDirection = FVector::ForwardVector;
 
-	// 대쉬
 	UPROPERTY(EditAnywhere, Category = "Dash", meta = (AllowPrivateAccess = "true"))
 	float DashPower = 1800.0f;
 
@@ -151,19 +173,20 @@ private:
 	float DashInvincibleTime = 0.2f;
 
 	FTimerHandle DashTimerHandle;
-
-	// 무적
 	FTimerHandle InvincibleTimerHandle;
 
-	// 체력
+	// components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
-	UHealthComponent* HealthComponent;
+	TObjectPtr<UHealthComponent> HealthComponent;
 
-	// 전투
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	UCombatComponent* CombatComponent;
+	TObjectPtr<UCombatComponent> CombatComponent;
 
-	// 플레이어 데이터
+	// data
 	UPROPERTY(EditDefaultsOnly, Category = "Data")
 	TObjectPtr<UDataTable> CharacterStatTable;
+
+	// gold
+	UPROPERTY(VisibleAnywhere, Category = "Gold")
+	int32 Gold = 50;
 };

@@ -108,4 +108,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TObjectPtr<UAnimMontage> AttackMontage;
+
+	TWeakObjectPtr<AController> LastDamageInstigator;
 };

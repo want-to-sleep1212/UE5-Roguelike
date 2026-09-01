@@ -95,3 +95,15 @@ void UHealthComponent::InitializeHealth(float InMaxHealth)
 		0.0f
 	);
 }
+
+void UHealthComponent::IncreaseMaxHealth(float Amount)
+{
+	if (Amount <= 0.0f || bDead)
+	{
+		return;
+	}
+
+	MaxHealth += Amount;
+
+	Heal(Amount);
+}

@@ -41,14 +41,6 @@ void ARoomBase::BeginPlay()
 		&ARoomBase::OnRoomTriggerBeginOverlap
 	);
 }
-
-//// Called every frame
-//void ARoomBase::Tick(float DeltaTime)
-//{
-//	Super::Tick(DeltaTime);
-//
-//}
-
 bool ARoomBase::ClearRoom()
 {
 	if (RoomState != ERoomState::InProgress)
@@ -92,14 +84,14 @@ void ARoomBase::OnRoomTriggerBeginOverlap(
 	const FHitResult& SweepResult
 )
 {
-
 	if (RoomState != ERoomState::Waiting)
 	{
 		return;
 	}
 
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
-	if (Player == nullptr)
+
+	if (!Player)
 	{
 		return;
 	}

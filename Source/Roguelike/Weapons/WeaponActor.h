@@ -20,6 +20,8 @@ public:
 	void BeginAttackWindow();
 	void EndAttackWindow();
 
+	void IncreaseAttackDamage(float Amount);
+
 protected:
 	virtual void BeginPlay() override;
 

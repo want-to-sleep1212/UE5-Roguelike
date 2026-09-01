@@ -102,3 +102,13 @@ void AWeaponActor::OnWeaponHitBoxOverlap(
 		this
 	);
 }
+
+void AWeaponActor::IncreaseAttackDamage(float Amount)
+{
+	if (Amount <= 0.0f)
+	{
+		return;
+	}
+
+	AttackDamage += Amount;
+}

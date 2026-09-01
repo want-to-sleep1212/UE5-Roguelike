@@ -5,9 +5,8 @@
 
 #include "Blueprint/UserWidget.h"
 
-ARoguelikePlayerController::ARoguelikePlayerController()
-{
-}
+#include "UI/Widgets/PlayerMainUI.h"
+#include "Characters/Player/PlayerCharacter.h"
 
 void ARoguelikePlayerController::BeginPlay()
 {
@@ -25,7 +24,7 @@ void ARoguelikePlayerController::BeginPlay()
 		return;
 	}
 
-	PlayerMainUI = CreateWidget<UUserWidget>(
+	PlayerMainUI = CreateWidget<UPlayerMainUI>(
 		this,
 		PlayerMainUIClass
 	);
@@ -38,4 +37,32 @@ void ARoguelikePlayerController::BeginPlay()
 	}
 
 	PlayerMainUI->AddToViewport();
+
+	TryInitializePlayerUI();
+}
+
+void ARoguelikePlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	TryInitializePlayerUI();
+}
+
+void ARoguelikePlayerController::TryInitializePlayerUI()
+{
+	if (bPlayerUIInitialized)
+	{
+		return;
+	}
+
+	APlayerCharacter* PlayerCharacter =
+		Cast<APlayerCharacter>(GetPawn());
+
+	if (!PlayerCharacter || !PlayerMainUI)
+	{
+		return;
+	}
+
+	PlayerMainUI->InitializePlayer(PlayerCharacter);
+	bPlayerUIInitialized = true;
 }
