@@ -17,6 +17,8 @@ class ROGUELIKE_API ABossRoomBase : public ACombatRoomBase
 protected:
 	virtual void SpawnEnemies() override;
 
+	virtual bool ClearRoom() override;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Boss")
 	TArray<TSubclassOf<AEnemyCharacter>> BossClasses;

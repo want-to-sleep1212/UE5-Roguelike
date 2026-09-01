@@ -8,6 +8,8 @@
 #include "Components/SceneComponent.h"
 #include "Engine/World.h"
 
+#include "Core/RoguelikeGameMode.h"
+
 void ABossRoomBase::SpawnEnemies()
 {
 	if (BossClasses.IsEmpty())
@@ -79,4 +81,20 @@ void ABossRoomBase::SpawnEnemies()
 
 		RegisterEnemy(SpawnedBoss);
 	}
+}
+
+bool ABossRoomBase::ClearRoom()
+{
+	if (!Super::ClearRoom())
+	{
+		return false;
+	}
+
+	if (ARoguelikeGameMode* GameMode =
+		Cast<ARoguelikeGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->GameClear();
+	}
+
+	return true;
 }

@@ -27,6 +27,8 @@
 #include "Engine/DataTable.h"
 #include "Data/CharacterStatData.h"
 
+#include "Core/RoguelikeGameMode.h"
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -396,13 +398,12 @@ void APlayerCharacter::Die()
 
 	LifeState = ELifeState::Dead;
 
-	// 우선은 입력/이동만 막아두기
-	GetCharacterMovement()->DisableMovement();
+	ARoguelikeGameMode* GameMode = Cast<ARoguelikeGameMode>(GetWorld()->GetAuthGameMode());
 
-	// 나중에 할 것들
-	// - 사망 애니메이션 재생
-	// - 게임 오버 UI 표시
-	// - 리스폰 또는 재시작 처리
+	if (GameMode)
+	{
+		GameMode->GameOver();
+	}
 }
 
 float APlayerCharacter::GetCurrentHealth() const
