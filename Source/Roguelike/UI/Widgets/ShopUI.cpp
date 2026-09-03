@@ -186,7 +186,7 @@ void UShopUI::OnHealClicked()
 	HealthComponent->Heal(ItemData->HealAmount);
 
 	bHealPurchased = true;
-	MaxHealthUpgradeBuyButton->SetIsEnabled(false);
+	HealBuyButton->SetIsEnabled(false);
 }
 
 void UShopUI::OnWeaponUpgradeClicked()
